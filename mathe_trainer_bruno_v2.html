@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mathe-Trainer · Bruno</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;800&display=swap');
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;
+    --accent1:#6c63ff;--accent2:#ff6584;--accent3:#43e97b;--accent4:#f7971e;
+    --text:#e8eaf6;--text-muted:#8b90b8;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .header{background:var(--surface);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(108,99,255,0.2);}
+  .header-title{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,#6c63ff,#43e97b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .header-sub{font-size:0.75rem;color:var(--text-muted);}
+  .timer-pill{background:var(--surface2);border-radius:99px;padding:5px 14px;font-size:0.85rem;font-weight:700;color:var(--accent4);}
+  .session-bar{max-width:720px;margin:16px auto 0;padding:0 24px;}
+  .session-info{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;}
+  .progress-track{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#6c63ff,#43e97b);border-radius:99px;transition:width 0.5s;}
+  .tabs{max-width:720px;margin:14px auto 0;display:flex;gap:10px;padding:0 24px;overflow-x:auto;scrollbar-width:none;}
+  .tab{flex-shrink:0;padding:8px 18px;border-radius:99px;border:2px solid transparent;background:var(--surface);color:var(--text-muted);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:default;}
+  .tab.active{background:var(--accent1);color:white;}
+  .tab .badge{background:rgba(255,255,255,0.2);border-radius:99px;padding:1px 7px;font-size:0.7rem;margin-left:4px;}
+  .main{max-width:720px;margin:0 auto;padding:16px 24px 32px;}
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+  .stat-card{background:var(--surface);border-radius:12px;padding:14px;text-align:center;border:1px solid var(--surface2);}
+  .stat-val{font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;}
+  .stat-label{font-size:0.7rem;color:var(--text-muted);margin-top:2px;}
+  .card{background:var(--surface);border-radius:var(--radius);padding:28px;margin-bottom:16px;border:1px solid rgba(108,99,255,0.1);position:relative;overflow:hidden;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent1),var(--accent3));}
+  .level-row{display:flex;gap:8px;margin-bottom:20px;}
+  .level-btn{padding:5px 14px;border-radius:99px;border:2px solid var(--surface2);background:transparent;color:var(--text-muted);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.75rem;cursor:pointer;transition:all 0.2s;}
+  .level-btn.active{border-color:var(--accent4);color:var(--accent4);background:rgba(247,151,30,0.1);}
+  .topic-icon{font-size:2rem;display:block;margin-bottom:6px;}
+  .topic-label{font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:6px;}
+  .question-text{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:600;line-height:1.4;margin-bottom:20px;}
+  .math-expr{display:inline-block;background:var(--surface2);padding:2px 10px;border-radius:8px;font-family:'Courier New',monospace;color:#43e97b;font-size:1rem;}
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .option-btn{padding:14px;border-radius:12px;border:2px solid var(--surface2);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:all 0.15s;text-align:center;}
+  .option-btn:hover:not(:disabled){border-color:var(--accent1);background:rgba(108,99,255,0.1);}
+  .option-btn.correct{border-color:var(--accent3);background:rgba(67,233,123,0.15);color:var(--accent3);}
+  .option-btn.wrong{border-color:var(--accent2);background:rgba(255,101,132,0.1);color:var(--accent2);}
+  .input-row{display:flex;gap:10px;margin-bottom:16px;}
+  .answer-input{flex:1;padding:14px 18px;border-radius:12px;border:2px solid var(--surface2);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;outline:none;transition:border-color 0.2s;}
+  .answer-input:focus{border-color:var(--accent1);}
+  .answer-input.correct{border-color:var(--accent3);}
+  .answer-input.wrong{border-color:var(--accent2);}
+  .submit-btn{padding:14px 22px;border-radius:12px;border:none;background:var(--accent1);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;}
+  .feedback{padding:12px 16px;border-radius:12px;margin-bottom:14px;font-weight:700;font-size:0.9rem;display:none;}
+  .feedback.correct{background:rgba(67,233,123,0.12);color:var(--accent3);border:1px solid rgba(67,233,123,0.25);display:block;}
+  .feedback.wrong{background:rgba(255,101,132,0.08);color:#ff8fa3;border:1px solid rgba(255,101,132,0.2);display:block;}
+  .hint-btn{background:none;border:1px dashed var(--surface2);color:var(--text-muted);border-radius:8px;padding:6px 14px;font-family:'Nunito',sans-serif;font-size:0.78rem;cursor:pointer;margin-bottom:14px;}
+  .hint-box{background:rgba(247,151,30,0.08);border:1px solid rgba(247,151,30,0.2);border-radius:10px;padding:10px 14px;font-size:0.83rem;color:var(--accent4);margin-bottom:14px;display:none;}
+  .next-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent1),#8b5cf6);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;display:none;}
+  .next-btn.visible{display:block;}
+  .report-card{background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid rgba(108,99,255,0.12);}
+  .report-title{font-size:0.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:14px;font-weight:800;}
+  .report-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .report-topic{flex:0 0 180px;font-weight:700;font-size:0.85rem;}
+  .report-bar-track{flex:1;height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;}
+  .report-bar-fill{height:100%;border-radius:99px;transition:width 0.8s;}
+  .report-pct{flex:0 0 42px;text-align:right;font-weight:800;font-size:0.85rem;}
+  .finish-card{text-align:center;padding:32px 20px;}
+  .finish-emoji{font-size:3.5rem;margin-bottom:14px;}
+  .finish-title{font-family:'Baloo 2',cursive;font-size:1.8rem;font-weight:800;margin-bottom:8px;}
+  .finish-sub{color:var(--text-muted);margin-bottom:8px;font-size:1rem;}
+  .finish-scores{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;text-align:center;}
+  .finish-score-item{background:var(--surface2);border-radius:12px;padding:12px;}
+  .finish-score-val{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;}
+  .finish-score-label{font-size:0.7rem;color:var(--text-muted);margin-top:4px;}
+  .save-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#43e97b,#38f9d7);color:#0f1117;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:10px;}
+  .save-btn:disabled{opacity:0.5;cursor:default;}
+  .restart-btn{width:100%;padding:14px;border-radius:12px;border:2px solid var(--accent1);background:transparent;color:var(--accent1);font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;}
+  .save-status{margin-bottom:10px;font-size:0.85rem;font-weight:700;padding:10px;border-radius:10px;display:none;}
+  .save-status.ok{background:rgba(67,233,123,0.12);color:var(--accent3);border:1px solid rgba(67,233,123,0.25);display:block;}
+  .save-status.err{background:rgba(255,101,132,0.08);color:#ff8fa3;border:1px solid rgba(255,101,132,0.2);display:block;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">🧮 Mathe-Trainer</div>
+    <div class="header-sub">Bruno · 7. Klasse · Realschule Bayern</div>
+  </div>
+  <div class="timer-pill">⏱ <span id="timer">20:00</span></div>
+</div>
+
+<div class="session-bar">
+  <div class="session-info">
+    <span>Heutige Session</span>
+    <span id="prog-label">0 / 15</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-val" id="stat-correct" style="color:var(--accent3)">0</div><div class="stat-label">✅ Richtig</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-wrong" style="color:var(--accent2)">0</div><div class="stat-label">❌ Falsch</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-pct" style="color:var(--accent1)">—</div><div class="stat-label">📊 Score</div></div>
+  </div>
+
+  <div class="card" id="question-card">
+    <div class="level-row" id="level-row"></div>
+    <span class="topic-icon" id="topic-icon"></span>
+    <div class="topic-label" id="topic-label"></div>
+    <div class="question-text" id="question-text"></div>
+    <button class="hint-btn" id="hint-btn" onclick="showHint()">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint-box"></div>
+    <div class="options" id="options-container"></div>
+    <div class="input-row" id="input-container" style="display:none">
+      <input type="number" class="answer-input" id="answer-input" placeholder="Antwort eingeben..."/>
+      <button class="submit-btn" onclick="checkInput()">OK</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Weiter →</button>
+  </div>
+
+  <div class="report-card">
+    <div class="report-title">📈 Fortschritt dieser Session</div>
+    <div id="weekly-report"><div style="color:var(--text-muted);font-size:0.85rem">Noch keine Aufgaben gelöst.</div></div>
+  </div>
+</div>
+
+<script>
+// ⚠️ Reemplazá esta URL con la de tu Apps Script desplegado
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJPaHyXHP6fwIY1QwBjbohUz9aCuuBJwO0PWInHhfEgAyeDy5zOzvZIs9_PJbSqz62UA/exec';
+
+var topics = [
+  {
+    id:'terme',label:'Terme & Variablen',icon:'🔢',color:'#6c63ff',
+    questions:{
+      leicht:[
+        {type:'mc',q:'Was ist der Wert von <span class="math-expr">3x</span> wenn <span class="math-expr">x = 4</span>?',options:['7','12','34','1'],answer:'12',hint:'Multipliziere 3 × 4'},
+        {type:'mc',q:'Vereinfache: <span class="math-expr">2a + 3a</span>',options:['5a','6a','23a','5'],answer:'5a',hint:'Gleiche Variablen addieren: 2+3=5'},
+        {type:'input',q:'Berechne <span class="math-expr">4 · (x + 2)</span> für <span class="math-expr">x = 3</span>',answer:'20',hint:'Erst Klammer: 3+2=5. Dann: 4×5'},
+        {type:'mc',q:'Was bedeutet <span class="math-expr">a²</span>?',options:['a+a','a×2','a×a','2a'],answer:'a×a',hint:'Hoch 2 = die Zahl mit sich selbst multiplizieren'},
+        {type:'input',q:'Wie viel ist <span class="math-expr">5y - 2y</span> für <span class="math-expr">y = 6</span>?',answer:'18',hint:'Erst vereinfachen: 5y-2y = 3y. Dann: 3×6'},
+      ],
+      mittel:[
+        {type:'mc',q:'Löse: <span class="math-expr">2x + 5 = 13</span>',options:['x=3','x=4','x=9','x=6'],answer:'x=4',hint:'2x = 13-5 = 8. Also x = 8÷2'},
+        {type:'input',q:'Welchen Wert hat <span class="math-expr">3a² - a</span> für <span class="math-expr">a = 2</span>?',answer:'10',hint:'3×(2²) - 2 = 3×4 - 2 = 12 - 2'},
+        {type:'mc',q:'Faktorisiere: <span class="math-expr">6x + 9</span>',options:['3(2x+3)','6(x+3)','3(x+9)','2(3x+4)'],answer:'3(2x+3)',hint:'Gemeinsamer Faktor von 6 und 9 ist 3'},
+        {type:'mc',q:'Vereinfache: <span class="math-expr">4x · 3x</span>',options:['7x','12x','12x²','7x²'],answer:'12x²',hint:'4×3=12 und x×x=x²'},
+        {type:'input',q:'Löse nach x: <span class="math-expr">3x - 7 = 8</span>',answer:'5',hint:'3x = 8+7 = 15. Also x = 15÷3'},
+      ],
+      schwer:[
+        {type:'input',q:'Löse: <span class="math-expr">2(x+3) = 3(x-1)</span>',answer:'9',hint:'2x+6 = 3x-3 → 6+3 = 3x-2x'},
+        {type:'mc',q:'Vereinfache: <span class="math-expr">(x+3)(x-3)</span>',options:['x²-9','x²+9','x²-6x+9','x²-3'],answer:'x²-9',hint:'Dritte binomische Formel: (a+b)(a-b) = a²-b²'},
+        {type:'input',q:'<span class="math-expr">x² - 5x + 6 = 0</span>: kleinste Lösung?',answer:'2',hint:'Welche zwei Zahlen ergeben Summe 5 und Produkt 6?'},
+        {type:'mc',q:'Definitionsbereich von <span class="math-expr">1/(x-2)</span>?',options:['x≠0','x≠2','x>2','alle x'],answer:'x≠2',hint:'Nenner darf nicht 0 sein'},
+        {type:'input',q:'Wert von <span class="math-expr">2a² + 3b</span> für <span class="math-expr">a=3, b=4</span>?',answer:'30',hint:'2×9 + 3×4 = 18 + 12'},
+      ]
+    }
+  },
+  {
+    id:'prop',label:'Proportionalität',icon:'📐',color:'#ff6584',
+    questions:{
+      leicht:[
+        {type:'mc',q:'3 Äpfel kosten 1,50 €. Was kosten 6 Äpfel?',options:['2,00 €','3,00 €','4,50 €','1,75 €'],answer:'3,00 €',hint:'Doppelte Menge = doppelter Preis'},
+        {type:'input',q:'Auto fährt 60 km/h. Wie weit in 3 Stunden? (km)',answer:'180',hint:'Weg = 60 × 3'},
+        {type:'mc',q:'Was gilt bei direkter Proportionalität?',options:['y/x konstant','y×x konstant','y-x konstant','y+x konstant'],answer:'y/x konstant',hint:'y = k·x, also y/x = k'},
+        {type:'input',q:'5 kg kosten 15 €. Was kosten 8 kg? (€)',answer:'24',hint:'3 €/kg × 8'},
+        {type:'mc',q:'Graph der direkten Proportionalität?',options:['Kurve','Gerade durch (0,0)','Waagerechte','Parabel'],answer:'Gerade durch (0,0)',hint:'y = k·x ist eine Ursprungsgerade'},
+      ],
+      mittel:[
+        {type:'input',q:'4 Arbeiter brauchen 6 Tage. Wie viele Tage für 8 Arbeiter?',answer:'3',hint:'4×6 = 8×x → x = 3'},
+        {type:'mc',q:'Maßstab 1:50000. 3 cm = wie viel in Wirklichkeit?',options:['150 m','1,5 km','15 km','300 m'],answer:'1,5 km',hint:'3×50000=150000 cm=1,5 km'},
+        {type:'input',q:'y prop. zu x. Bei x=4: y=12. Was ist y bei x=7?',answer:'21',hint:'k=3, also y=3×7'},
+        {type:'mc',q:'Was ist indirekt proportional?',options:['Preis & Menge','Geschwindigkeit & Zeit (gleicher Weg)','Radius & Umfang','Stunden & Lohn'],answer:'Geschwindigkeit & Zeit (gleicher Weg)',hint:'v×t=s (konstant) → indirekt'},
+        {type:'input',q:'Zug fährt 200 km in 2h. Wie lange für 500 km? (h)',answer:'5',hint:'100 km/h → 500÷100'},
+      ],
+      schwer:[
+        {type:'mc',q:'Prozentualer Anstieg von 80 auf 100?',options:['20%','25%','80%','15%'],answer:'25%',hint:'20/80×100'},
+        {type:'input',q:'Nach 20% Rabatt kostet etwas 64 €. Originalpreis? (€)',answer:'80',hint:'64=80% → 64÷0,8'},
+        {type:'mc',q:'1000 € wachsen 10%/Jahr. Nach 2 Jahren?',options:['1200 €','1210 €','1100 €','1020 €'],answer:'1210 €',hint:'1000×1,1×1,1'},
+        {type:'input',q:'3L zu 4€/L und 2L zu 6€/L gemischt. Durchschnittspreis? (€/L)',answer:'5',hint:'(12+12)/5=24/5'},
+        {type:'mc',q:'Verhältnis a:b=3:5. a=12. Was ist b?',options:['15','20','8','18'],answer:'20',hint:'3/5=12/b → b=20'},
+      ]
+    }
+  },
+  {
+    id:'geo',label:'Geometrie',icon:'📏',color:'#43e97b',
+    questions:{
+      leicht:[
+        {type:'mc',q:'Umfang eines Quadrats mit a = 5 cm?',options:['10 cm','20 cm','25 cm','15 cm'],answer:'20 cm',hint:'U = 4 × 5'},
+        {type:'input',q:'Rechteck: Länge 8 cm, Breite 5 cm. Fläche? (cm²)',answer:'40',hint:'A = 8 × 5'},
+        {type:'mc',q:'Pythagoras: In einem rechtwinkligen Dreieck gilt:',options:['a+b=c','a²+b²=c²','a×b=c','2a=c'],answer:'a²+b²=c²',hint:'c ist die Hypotenuse'},
+        {type:'input',q:'Hypotenuse: a=3, b=4. c=? (cm)',answer:'5',hint:'c²=9+16=25 → c=5'},
+        {type:'mc',q:'Volumen eines Würfels mit a = 3 cm?',options:['9 cm³','18 cm³','27 cm³','12 cm³'],answer:'27 cm³',hint:'V = 3³ = 27'},
+      ],
+      mittel:[
+        {type:'input',q:'Kreis mit r=5 cm. Fläche? (π≈3,14, ganze Zahl)',answer:'79',hint:'A=3,14×25≈78,5≈79'},
+        {type:'mc',q:'Umfang Kreis mit d=10 cm? (π≈3,14)',options:['31,4 cm','62,8 cm','78,5 cm','15,7 cm'],answer:'31,4 cm',hint:'U=π×d=3,14×10'},
+        {type:'input',q:'Kathete a=?, b=12, c=13 (cm)',answer:'5',hint:'a²=169-144=25 → a=5'},
+        {type:'mc',q:'Dreieck: Grundlinie 8cm, Höhe 6cm. Fläche?',options:['48 cm²','24 cm²','14 cm²','12 cm²'],answer:'24 cm²',hint:'A=(8×6)÷2'},
+        {type:'input',q:'Quader: l=6, b=4, h=3. Volumen? (cm³)',answer:'72',hint:'V=6×4×3'},
+      ],
+      schwer:[
+        {type:'mc',q:'Oberfläche Würfel mit a=4 cm?',options:['64 cm²','96 cm²','24 cm²','48 cm²'],answer:'96 cm²',hint:'6×a²=6×16'},
+        {type:'input',q:'Zylinder: r=3, h=10. Volumen? (π≈3,14, ganze Zahl)',answer:'283',hint:'V=3,14×9×10'},
+        {type:'mc',q:'Diagonale Rechteck: a=6, b=8?',options:['10 cm','14 cm','7 cm','12 cm'],answer:'10 cm',hint:'d²=36+64=100'},
+        {type:'input',q:'Quader l=5,b=3,h=4. Oberfläche? (cm²)',answer:'94',hint:'2(15+20+12)=2×47'},
+        {type:'mc',q:'Gleichseitiges Dreieck a=4 cm. Fläche? (√3≈1,73)',options:['6,92 cm²','8 cm²','4,5 cm²','5,2 cm²'],answer:'6,92 cm²',hint:'A=(a²×√3)/4=(16×1,73)/4'},
+      ]
+    }
+  }
+];
+
+var state={
+  level:'leicht',answered:false,
+  correct:0,wrong:0,total:0,
+  topicStats:{terme:{correct:0,total:0},prop:{correct:0,total:0},geo:{correct:0,total:0}},
+  sessionQuestions:[],sessionPos:0,
+  timerSec:1200,timerInterval:null,startTime:null
+};
+
+function buildSession(){
+  state.sessionQuestions=[];
+  topics.forEach(function(t){
+    var pool=t.questions[state.level].slice().sort(function(){return Math.random()-0.5;}).slice(0,5);
+    pool.forEach(function(q){state.sessionQuestions.push(Object.assign({},q,{topicId:t.id,topicLabel:t.label,topicIcon:t.icon}));});
+  });
+  state.sessionPos=0;state.correct=0;state.wrong=0;state.total=0;
+  state.topicStats={terme:{correct:0,total:0},prop:{correct:0,total:0},geo:{correct:0,total:0}};
+  state.startTime=new Date();
+}
+
+function getCurrent(){return state.sessionQuestions[state.sessionPos];}
+
+function renderTabs(){
+  var c=document.getElementById('tabs');c.innerHTML='';
+  var cur=getCurrent()?getCurrent().topicId:null;
+  topics.forEach(function(t){
+    var s=state.topicStats[t.id];
+    var pct=s.total>0?Math.round(s.correct/s.total*100):null;
+    var btn=document.createElement('button');
+    btn.className='tab'+(t.id===cur?' active':'');
+    btn.innerHTML=t.icon+' '+t.label+(pct!==null?'<span class="badge">'+pct+'%</span>':'');
+    c.appendChild(btn);
+  });
+}
+
+function renderLevels(){
+  var row=document.getElementById('level-row');row.innerHTML='';
+  var labels={leicht:'🟢 Leicht',mittel:'🟡 Mittel',schwer:'🔴 Schwer'};
+  ['leicht','mittel','schwer'].forEach(function(l){
+    var btn=document.createElement('button');
+    btn.className='level-btn'+(state.level===l?' active':'');
+    btn.textContent=labels[l];
+    btn.onclick=function(){state.level=l;buildSession();renderAll();};
+    row.appendChild(btn);
+  });
+}
+
+function renderQuestion(){
+  var q=getCurrent();
+  if(!q){showFinish();return;}
+  document.getElementById('topic-icon').textContent=q.topicIcon;
+  document.getElementById('topic-label').textContent=q.topicLabel;
+  document.getElementById('question-text').innerHTML=q.q;
+  document.getElementById('hint-box').style.display='none';
+  document.getElementById('hint-btn').style.display='inline-block';
+  document.getElementById('hint-box').textContent=q.hint;
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('next-btn').className='next-btn';
+  state.answered=false;
+  var oc=document.getElementById('options-container');
+  var ic=document.getElementById('input-container');
+  var inp=document.getElementById('answer-input');
+  if(q.type==='mc'){
+    oc.style.display='grid';ic.style.display='none';oc.innerHTML='';
+    q.options.slice().sort(function(){return Math.random()-0.5;}).forEach(function(opt){
+      var btn=document.createElement('button');
+      btn.className='option-btn';btn.textContent=opt;
+      btn.onclick=function(){checkMC(opt,btn);};
+      oc.appendChild(btn);
+    });
+  } else {
+    oc.style.display='none';ic.style.display='flex';
+    inp.value='';inp.className='answer-input';inp.disabled=false;
+    inp.onkeydown=function(e){if(e.key==='Enter')checkInput();};
+    setTimeout(function(){inp.focus();},100);
+  }
+  updateProgress();renderTabs();
+}
+
+function checkMC(selected,btn){
+  if(state.answered)return;
+  state.answered=true;
+  var q=getCurrent();
+  var ok=selected===q.answer;
+  record(ok,q.topicId);
+  document.querySelectorAll('.option-btn').forEach(function(b){
+    b.disabled=true;
+    if(b.textContent===q.answer)b.classList.add('correct');
+  });
+  if(!ok)btn.classList.add('wrong');
+  showFeedback(ok,q.answer);
+}
+
+function checkInput(){
+  if(state.answered)return;
+  var inp=document.getElementById('answer-input');
+  var val=inp.value.trim().replace(',','.');
+  var q=getCurrent();
+  var ok=val===String(q.answer).replace(',','.');
+  state.answered=true;inp.disabled=true;
+  inp.className='answer-input '+(ok?'correct':'wrong');
+  record(ok,q.topicId);
+  showFeedback(ok,q.answer);
+}
+
+function record(ok,topicId){
+  state.total++;
+  if(ok){state.correct++;state.topicStats[topicId].correct++;}
+  else state.wrong++;
+  state.topicStats[topicId].total++;
+  updateStats();renderWeekly();renderTabs();
+}
+
+function showFeedback(ok,answer){
+  var fb=document.getElementById('feedback');
+  if(ok){
+    var msgs=['Super! Richtig! 🎉','Perfekt! 🌟','Ja, genau! ✅','Klasse! 🚀','Sehr gut! ⭐'];
+    fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    fb.className='feedback correct';
+  } else {
+    fb.textContent='❌ Leider falsch. Richtige Antwort: '+answer;
+    fb.className='feedback wrong';
+  }
+  document.getElementById('next-btn').className='next-btn visible';
+}
+
+function showHint(){
+  document.getElementById('hint-box').style.display='block';
+  document.getElementById('hint-btn').style.display='none';
+}
+
+function nextQuestion(){
+  state.sessionPos++;
+  if(state.sessionPos>=state.sessionQuestions.length)showFinish();
+  else renderQuestion();
+}
+
+function updateStats(){
+  document.getElementById('stat-correct').textContent=state.correct;
+  document.getElementById('stat-wrong').textContent=state.wrong;
+  document.getElementById('stat-pct').textContent=state.total>0?Math.round(state.correct/state.total*100)+'%':'—';
+}
+
+function updateProgress(){
+  var t=state.sessionQuestions.length,d=state.sessionPos;
+  document.getElementById('prog-label').textContent=d+' / '+t;
+  document.getElementById('progress-fill').style.width=((d/t)*100)+'%';
+}
+
+function renderWeekly(){
+  var c=document.getElementById('weekly-report');c.innerHTML='';
+  var any=false;
+  topics.forEach(function(t){
+    var s=state.topicStats[t.id];
+    if(s.total===0)return;
+    any=true;
+    var pct=Math.round(s.correct/s.total*100);
+    var color=pct>=70?'#43e97b':pct>=40?'#f7971e':'#ff6584';
+    c.innerHTML+='<div class="report-row"><div class="report-topic">'+t.icon+' '+t.label+'</div><div class="report-bar-track"><div class="report-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div class="report-pct" style="color:'+color+'">'+pct+'%</div></div>';
+  });
+  if(!any)c.innerHTML='<div style="color:var(--text-muted);font-size:0.85rem">Noch keine Aufgaben gelöst.</div>';
+}
+
+function showFinish(){
+  clearInterval(state.timerInterval);
+  var pct=state.total>0?Math.round(state.correct/state.total*100):0;
+  var emoji=pct>=80?'🏆':pct>=60?'💪':'📚';
+  var msg=pct>=80?'Ausgezeichnet! Weiter so!':pct>=60?'Gut gemacht! Weiter üben!':'Nicht aufgeben — jeden Tag besser!';
+  var ts=state.topicStats;
+  var dauer=state.startTime?Math.round((new Date()-state.startTime)/60000):20;
+
+  document.getElementById('question-card').innerHTML=
+    '<div class="finish-card">'+
+    '<div class="finish-emoji">'+emoji+'</div>'+
+    '<div class="finish-title">Geschafft!</div>'+
+    '<div class="finish-sub">'+state.correct+' von '+state.total+' richtig — '+pct+'%</div>'+
+    '<div class="finish-sub" style="margin-bottom:0">'+msg+'</div>'+
+    '<div class="finish-scores">'+
+      '<div class="finish-score-item"><div class="finish-score-val" style="color:#6c63ff">'+
+        (ts.terme.total>0?Math.round(ts.terme.correct/ts.terme.total*100)+'%':'—')+
+      '</div><div class="finish-score-label">🔢 Terme</div></div>'+
+      '<div class="finish-score-item"><div class="finish-score-val" style="color:#ff6584">'+
+        (ts.prop.total>0?Math.round(ts.prop.correct/ts.prop.total*100)+'%':'—')+
+      '</div><div class="finish-score-label">📐 Prop.</div></div>'+
+      '<div class="finish-score-item"><div class="finish-score-val" style="color:#43e97b">'+
+        (ts.geo.total>0?Math.round(ts.geo.correct/ts.geo.total*100)+'%':'—')+
+      '</div><div class="finish-score-label">📏 Geo.</div></div>'+
+    '</div>'+
+    '<div class="save-status" id="save-status"></div>'+
+    '<button class="save-btn" id="save-btn" onclick="saveResults('+pct+','+dauer+')">💾 Ergebnisse speichern</button>'+
+    '<button class="restart-btn" onclick="restartSession()">🔁 Nochmal üben</button>'+
+    '</div>';
+}
+
+function saveResults(pct,dauer){
+  var btn=document.getElementById('save-btn');
+  var status=document.getElementById('save-status');
+  btn.disabled=true;
+  btn.textContent='Wird gespeichert...';
+  var ts=state.topicStats;
+  var payload={
+    level:state.level,
+    terme:{pct:ts.terme.total>0?Math.round(ts.terme.correct/ts.terme.total*100):0,correct:ts.terme.correct,total:ts.terme.total},
+    prop:{pct:ts.prop.total>0?Math.round(ts.prop.correct/ts.prop.total*100):0,correct:ts.prop.correct,total:ts.prop.total},
+    geo:{pct:ts.geo.total>0?Math.round(ts.geo.correct/ts.geo.total*100):0,correct:ts.geo.correct,total:ts.geo.total},
+    gesamt:{pct:pct,correct:state.correct,total:state.total},
+    dauer:dauer
+  };
+  fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.status==='ok'){
+        status.textContent='✅ Ergebnisse gespeichert! Papa kann deinen Fortschritt sehen.';
+        status.className='save-status ok';
+        btn.textContent='✅ Gespeichert';
+      } else {
+        throw new Error(d.message);
+      }
+    })
+    .catch(function(){
+      status.textContent='⚠️ Speichern fehlgeschlagen. Bitte Papa zeigen.';
+      status.className='save-status err';
+      btn.disabled=false;
+      btn.textContent='💾 Nochmal versuchen';
+    });
+}
+
+function restartSession(){buildSession();renderAll();startTimer();}
+
+function startTimer(){
+  clearInterval(state.timerInterval);
+  state.timerSec=1200;
+  state.timerInterval=setInterval(function(){
+    state.timerSec--;
+    var m=String(Math.floor(state.timerSec/60)).padStart(2,'0');
+    var s=String(state.timerSec%60).padStart(2,'0');
+    document.getElementById('timer').textContent=m+':'+s;
+    if(state.timerSec<=0){clearInterval(state.timerInterval);showFinish();}
+  },1000);
+}
+
+function renderAll(){renderLevels();renderQuestion();updateStats();renderWeekly();}
+buildSession();renderAll();startTimer();
+</script>
+</body>
+</html>
