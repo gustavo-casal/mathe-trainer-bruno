@@ -17,10 +17,15 @@
   .header-title{font-family:'Baloo 2',cursive;font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,#6c63ff,#43e97b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
   .header-sub{font-size:0.75rem;color:var(--text-muted);}
   .timer-pill{background:var(--surface2);border-radius:99px;padding:5px 14px;font-size:0.85rem;font-weight:700;color:var(--accent4);}
-  .session-bar{max-width:720px;margin:16px auto 0;padding:0 24px;}
-  .session-info{display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);margin-bottom:6px;}
-  .progress-track{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;}
-  .progress-fill{height:100%;background:linear-gradient(90deg,#6c63ff,#43e97b);border-radius:99px;transition:width 0.5s;}
+
+  /* Daily goal progress bar */
+  .daily-bar-wrap{max-width:720px;margin:16px auto 0;padding:0 24px;}
+  .daily-bar-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .daily-bar-title{font-weight:800;font-size:1rem;color:var(--text);}
+  .daily-bar-pct{font-size:0.8rem;color:var(--text-muted);font-weight:700;}
+  .daily-bar-track{height:22px;background:var(--surface2);border-radius:99px;overflow:hidden;border:2px solid rgba(255,255,255,0.05);}
+  .daily-bar-fill{height:100%;width:0%;border-radius:99px;transition:width 1s ease, background 1s ease;}
+
   .tabs{max-width:720px;margin:14px auto 0;display:flex;gap:10px;padding:0 24px;overflow-x:auto;scrollbar-width:none;}
   .tab{flex-shrink:0;padding:8px 18px;border-radius:99px;border:2px solid transparent;background:var(--surface);color:var(--text-muted);font-family:'Nunito',sans-serif;font-weight:700;font-size:0.82rem;cursor:default;}
   .tab.active{background:var(--accent1);color:white;}
@@ -78,6 +83,15 @@
   .save-status{margin-bottom:10px;font-size:0.85rem;font-weight:700;padding:10px;border-radius:10px;display:none;}
   .save-status.ok{background:rgba(67,233,123,0.12);color:var(--accent3);border:1px solid rgba(67,233,123,0.25);display:block;}
   .save-status.err{background:rgba(255,101,132,0.08);color:#ff8fa3;border:1px solid rgba(255,101,132,0.2);display:block;}
+
+  /* Goal reached overlay */
+  .goal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px;}
+  .goal-box{background:var(--surface);border-radius:24px;padding:40px 32px;text-align:center;max-width:400px;width:100%;border:2px solid #43e97b;box-shadow:0 0 40px rgba(67,233,123,0.25);}
+  .goal-emoji{font-size:4rem;margin-bottom:16px;}
+  .goal-title{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:#43e97b;margin-bottom:8px;}
+  .goal-sub{color:var(--text-muted);font-size:1rem;margin-bottom:24px;}
+  .goal-continue-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent1),#8b5cf6);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:10px;}
+  .goal-save-btn{width:100%;padding:14px;border-radius:12px;border:2px solid #43e97b;background:transparent;color:#43e97b;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -87,15 +101,17 @@
     <div class="header-title">🧮 Mathe-Trainer</div>
     <div class="header-sub">Bruno · 7. Klasse · Realschule Bayern</div>
   </div>
-  <div class="timer-pill">⏱ <span id="timer">20:00</span></div>
+  <div class="timer-pill">⏱ <span id="timer">00:00</span></div>
 </div>
 
-<div class="session-bar">
-  <div class="session-info">
-    <span>Heutige Session</span>
-    <span id="prog-label">0 / 15</span>
+<div class="daily-bar-wrap">
+  <div class="daily-bar-label">
+    <span class="daily-bar-title">Heute geübt: <span id="daily-label">0 / 20 Min</span></span>
+    <span class="daily-bar-pct" id="daily-pct">0%</span>
   </div>
-  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="daily-bar-track">
+    <div class="daily-bar-fill" id="daily-bar-fill"></div>
+  </div>
 </div>
 
 <div class="tabs" id="tabs"></div>
@@ -130,8 +146,8 @@
 </div>
 
 <script>
-// ⚠️ Reemplazá esta URL con la de tu Apps Script desplegado
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJPaHyXHP6fwIY1QwBjbohUz9aCuuBJwO0PWInHhfEgAyeDy5zOzvZIs9_PJbSqz62UA/exec';
+var GOAL_SEC = 20 * 60; // 20 minutes
 
 var topics = [
   {
@@ -219,21 +235,25 @@ var state={
   correct:0,wrong:0,total:0,
   topicStats:{terme:{correct:0,total:0},prop:{correct:0,total:0},geo:{correct:0,total:0}},
   sessionQuestions:[],sessionPos:0,
-  timerSec:1200,timerInterval:null,startTime:null
+  elapsedSec:0,timerInterval:null,startTime:null,
+  goalReached:false
 };
 
 function buildSession(){
-  state.sessionQuestions=[];
+  var pool=[];
   topics.forEach(function(t){
-    var pool=t.questions[state.level].slice().sort(function(){return Math.random()-0.5;}).slice(0,5);
-    pool.forEach(function(q){state.sessionQuestions.push(Object.assign({},q,{topicId:t.id,topicLabel:t.label,topicIcon:t.icon}));});
+    var qs=t.questions[state.level].slice().sort(function(){return Math.random()-0.5;});
+    qs.forEach(function(q){pool.push(Object.assign({},q,{topicId:t.id,topicLabel:t.label,topicIcon:t.icon}));});
   });
+  // shuffle full pool
+  pool.sort(function(){return Math.random()-0.5;});
+  state.sessionQuestions=pool;
   state.sessionPos=0;state.correct=0;state.wrong=0;state.total=0;
   state.topicStats={terme:{correct:0,total:0},prop:{correct:0,total:0},geo:{correct:0,total:0}};
   state.startTime=new Date();
 }
 
-function getCurrent(){return state.sessionQuestions[state.sessionPos];}
+function getCurrent(){return state.sessionQuestions[state.sessionPos % state.sessionQuestions.length];}
 
 function renderTabs(){
   var c=document.getElementById('tabs');c.innerHTML='';
@@ -262,7 +282,7 @@ function renderLevels(){
 
 function renderQuestion(){
   var q=getCurrent();
-  if(!q){showFinish();return;}
+  if(!q)return;
   document.getElementById('topic-icon').textContent=q.topicIcon;
   document.getElementById('topic-label').textContent=q.topicLabel;
   document.getElementById('question-text').innerHTML=q.q;
@@ -289,7 +309,7 @@ function renderQuestion(){
     inp.onkeydown=function(e){if(e.key==='Enter')checkInput();};
     setTimeout(function(){inp.focus();},100);
   }
-  updateProgress();renderTabs();
+  renderTabs();
 }
 
 function checkMC(selected,btn){
@@ -346,8 +366,7 @@ function showHint(){
 
 function nextQuestion(){
   state.sessionPos++;
-  if(state.sessionPos>=state.sessionQuestions.length)showFinish();
-  else renderQuestion();
+  renderQuestion();
 }
 
 function updateStats(){
@@ -356,10 +375,29 @@ function updateStats(){
   document.getElementById('stat-pct').textContent=state.total>0?Math.round(state.correct/state.total*100)+'%':'—';
 }
 
-function updateProgress(){
-  var t=state.sessionQuestions.length,d=state.sessionPos;
-  document.getElementById('prog-label').textContent=d+' / '+t;
-  document.getElementById('progress-fill').style.width=((d/t)*100)+'%';
+function updateDailyBar(){
+  var pct=Math.min(state.elapsedSec/GOAL_SEC*100,100);
+  var fill=document.getElementById('daily-bar-fill');
+  var mins=Math.floor(state.elapsedSec/60);
+  var label=document.getElementById('daily-label');
+  var pctEl=document.getElementById('daily-pct');
+
+  label.textContent=mins+' / 20 Min';
+  pctEl.textContent=Math.round(pct)+'%';
+  fill.style.width=pct+'%';
+
+  // traffic-light color: red → orange → green
+  var r,g,b=0;
+  if(pct<=50){
+    // red to orange: rgb(255,60,60) → rgb(255,165,0)
+    var t=pct/50;
+    r=255;g=Math.round(60+t*(165-60));
+  } else {
+    // orange to green: rgb(255,165,0) → rgb(67,233,123)
+    var t=(pct-50)/50;
+    r=Math.round(255+t*(67-255));g=Math.round(165+t*(233-165));b=Math.round(t*123);
+  }
+  fill.style.background='rgb('+r+','+g+','+b+')';
 }
 
 function renderWeekly(){
@@ -376,13 +414,39 @@ function renderWeekly(){
   if(!any)c.innerHTML='<div style="color:var(--text-muted);font-size:0.85rem">Noch keine Aufgaben gelöst.</div>';
 }
 
+function showGoalOverlay(){
+  if(document.getElementById('goal-overlay'))return;
+  var overlay=document.createElement('div');
+  overlay.className='goal-overlay';
+  overlay.id='goal-overlay';
+  overlay.innerHTML=
+    '<div class="goal-box">'+
+    '<div class="goal-emoji">🎉</div>'+
+    '<div class="goal-title">Super, Bruno!</div>'+
+    '<div class="goal-sub">20 Minuten geschafft!</div>'+
+    '<button class="goal-continue-btn" onclick="closeGoalOverlay()">💪 Weiter üben</button>'+
+    '<button class="goal-save-btn" onclick="closeGoalAndFinish()">💾 Ergebnisse speichern</button>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function closeGoalOverlay(){
+  var el=document.getElementById('goal-overlay');
+  if(el)el.remove();
+}
+
+function closeGoalAndFinish(){
+  closeGoalOverlay();
+  showFinish();
+}
+
 function showFinish(){
   clearInterval(state.timerInterval);
   var pct=state.total>0?Math.round(state.correct/state.total*100):0;
   var emoji=pct>=80?'🏆':pct>=60?'💪':'📚';
   var msg=pct>=80?'Ausgezeichnet! Weiter so!':pct>=60?'Gut gemacht! Weiter üben!':'Nicht aufgeben — jeden Tag besser!';
   var ts=state.topicStats;
-  var dauer=state.startTime?Math.round((new Date()-state.startTime)/60000):20;
+  var dauer=Math.round(state.elapsedSec/60);
 
   document.getElementById('question-card').innerHTML=
     '<div class="finish-card">'+
@@ -440,21 +504,27 @@ function saveResults(pct,dauer){
     });
 }
 
-function restartSession(){buildSession();renderAll();startTimer();}
+function restartSession(){
+  state.elapsedSec=0;state.goalReached=false;
+  buildSession();renderAll();startTimer();
+}
 
 function startTimer(){
   clearInterval(state.timerInterval);
-  state.timerSec=1200;
   state.timerInterval=setInterval(function(){
-    state.timerSec--;
-    var m=String(Math.floor(state.timerSec/60)).padStart(2,'0');
-    var s=String(state.timerSec%60).padStart(2,'0');
+    state.elapsedSec++;
+    var m=String(Math.floor(state.elapsedSec/60)).padStart(2,'0');
+    var s=String(state.elapsedSec%60).padStart(2,'0');
     document.getElementById('timer').textContent=m+':'+s;
-    if(state.timerSec<=0){clearInterval(state.timerInterval);showFinish();}
+    updateDailyBar();
+    if(state.elapsedSec>=GOAL_SEC && !state.goalReached){
+      state.goalReached=true;
+      showGoalOverlay();
+    }
   },1000);
 }
 
-function renderAll(){renderLevels();renderQuestion();updateStats();renderWeekly();}
+function renderAll(){renderLevels();renderQuestion();updateStats();renderWeekly();updateDailyBar();}
 buildSession();renderAll();startTimer();
 </script>
 </body>
