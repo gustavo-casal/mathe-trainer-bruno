@@ -64,7 +64,7 @@
   .report-card{background:var(--surface);border-radius:var(--radius);padding:20px;border:1px solid rgba(108,99,255,0.12);}
   .report-title{font-size:0.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:14px;font-weight:800;}
   .report-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-  .report-topic{flex:0 0 180px;font-weight:700;font-size:0.85rem;}
+  .report-topic{flex:0 0 200px;font-weight:700;font-size:0.85rem;}
   .report-bar-track{flex:1;height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;}
   .report-bar-fill{height:100%;border-radius:99px;transition:width 0.8s;}
   .report-pct{flex:0 0 42px;text-align:right;font-weight:800;font-size:0.85rem;}
@@ -89,6 +89,7 @@
   .goal-sub{color:var(--text-muted);font-size:1rem;margin-bottom:24px;}
   .goal-continue-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent1),#8b5cf6);color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;margin-bottom:10px;}
   .goal-save-btn{width:100%;padding:14px;border-radius:12px;border:2px solid #43e97b;background:transparent;color:#43e97b;font-family:'Nunito',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;}
+  .version-tag{font-size:0.65rem;color:var(--text-muted);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -97,6 +98,7 @@
   <div>
     <div class="header-title">🧮 Mathe-Trainer</div>
     <div class="header-sub">Bruno · 7. Klasse · Realschule Bayern</div>
+    <div class="version-tag">v2 · Mathematik heute 7 II/III</div>
   </div>
   <div class="timer-pill">⏱ <span id="timer">00:00</span></div>
 </div>
@@ -138,13 +140,118 @@
 var SCRIPT_URL='https://script.google.com/macros/s/AKfycbwJPaHyXHP6fwIY1QwBjbohUz9aCuuBJwO0PWInHhfEgAyeDy5zOzvZIs9_PJbSqz62UA/exec';
 var GOAL_SEC=20*60;
 var LEVELS=['leicht','mittel','schwer'];
-var topics=[{id:'terme',label:'Terme & Variablen',icon:'🔢',color:'#6c63ff',questions:{leicht:[{type:'mc',q:'Was ist der Wert von <span class="math-expr">3x</span> wenn <span class="math-expr">x = 4</span>?',options:['7','12','34','1'],answer:'12',hint:'Multipliziere 3 × 4'},{type:'mc',q:'Vereinfache: <span class="math-expr">2a + 3a</span>',options:['5a','6a','23a','5'],answer:'5a',hint:'Gleiche Variablen addieren: 2+3=5'},{type:'input',q:'Berechne <span class="math-expr">4 · (x + 2)</span> für <span class="math-expr">x = 3</span>',answer:'20',hint:'Erst Klammer: 3+2=5. Dann: 4×5'},{type:'mc',q:'Was bedeutet <span class="math-expr">a²</span>?',options:['a+a','a×2','a×a','2a'],answer:'a×a',hint:'Hoch 2 = die Zahl mit sich selbst multiplizieren'},{type:'input',q:'Wie viel ist <span class="math-expr">5y - 2y</span> für <span class="math-expr">y = 6</span>?',answer:'18',hint:'Erst vereinfachen: 5y-2y = 3y. Dann: 3×6'}],mittel:[{type:'mc',q:'Löse: <span class="math-expr">2x + 5 = 13</span>',options:['x=3','x=4','x=9','x=6'],answer:'x=4',hint:'2x = 13-5 = 8. Also x = 8÷2'},{type:'input',q:'Welchen Wert hat <span class="math-expr">3a² - a</span> für <span class="math-expr">a = 2</span>?',answer:'10',hint:'3×(2²) - 2 = 3×4 - 2 = 12 - 2'},{type:'mc',q:'Faktorisiere: <span class="math-expr">6x + 9</span>',options:['3(2x+3)','6(x+3)','3(x+9)','2(3x+4)'],answer:'3(2x+3)',hint:'Gemeinsamer Faktor von 6 und 9 ist 3'},{type:'mc',q:'Vereinfache: <span class="math-expr">4x · 3x</span>',options:['7x','12x','12x²','7x²'],answer:'12x²',hint:'4×3=12 und x×x=x²'},{type:'input',q:'Löse nach x: <span class="math-expr">3x - 7 = 8</span>',answer:'5',hint:'3x = 8+7 = 15. Also x = 15÷3'}],schwer:[{type:'input',q:'Löse: <span class="math-expr">2(x+3) = 3(x-1)</span>',answer:'9',hint:'2x+6 = 3x-3 → 6+3 = 3x-2x'},{type:'mc',q:'Vereinfache: <span class="math-expr">(x+3)(x-3)</span>',options:['x²-9','x²+9','x²-6x+9','x²-3'],answer:'x²-9',hint:'Dritte binomische Formel: (a+b)(a-b) = a²-b²'},{type:'input',q:'<span class="math-expr">x² - 5x + 6 = 0</span>: kleinste Lösung?',answer:'2',hint:'Welche zwei Zahlen ergeben Summe 5 und Produkt 6?'},{type:'mc',q:'Definitionsbereich von <span class="math-expr">1/(x-2)</span>?',options:['x≠0','x≠2','x>2','alle x'],answer:'x≠2',hint:'Nenner darf nicht 0 sein'},{type:'input',q:'Wert von <span class="math-expr">2a² + 3b</span> für <span class="math-expr">a=3, b=4</span>?',answer:'30',hint:'2×9 + 3×4 = 18 + 12'}]}},{id:'prop',label:'Proportionalität',icon:'📐',color:'#ff6584',questions:{leicht:[{type:'mc',q:'3 Äpfel kosten 1,50 €. Was kosten 6 Äpfel?',options:['2,00 €','3,00 €','4,50 €','1,75 €'],answer:'3,00 €',hint:'Doppelte Menge = doppelter Preis'},{type:'input',q:'Auto fährt 60 km/h. Wie weit in 3 Stunden? (km)',answer:'180',hint:'Weg = 60 × 3'},{type:'mc',q:'Was gilt bei direkter Proportionalität?',options:['y/x konstant','y×x konstant','y-x konstant','y+x konstant'],answer:'y/x konstant',hint:'y = k·x, also y/x = k'},{type:'input',q:'5 kg kosten 15 €. Was kosten 8 kg? (€)',answer:'24',hint:'3 €/kg × 8'},{type:'mc',q:'Graph der direkten Proportionalität?',options:['Kurve','Gerade durch (0,0)','Waagerechte','Parabel'],answer:'Gerade durch (0,0)',hint:'y = k·x ist eine Ursprungsgerade'}],mittel:[{type:'input',q:'4 Arbeiter brauchen 6 Tage. Wie viele Tage für 8 Arbeiter?',answer:'3',hint:'4×6 = 8×x → x = 3'},{type:'mc',q:'Maßstab 1:50000. 3 cm = wie viel in Wirklichkeit?',options:['150 m','1,5 km','15 km','300 m'],answer:'1,5 km',hint:'3×50000=150000 cm=1,5 km'},{type:'input',q:'y prop. zu x. Bei x=4: y=12. Was ist y bei x=7?',answer:'21',hint:'k=3, also y=3×7'},{type:'mc',q:'Was ist indirekt proportional?',options:['Preis & Menge','Geschwindigkeit & Zeit (gleicher Weg)','Radius & Umfang','Stunden & Lohn'],answer:'Geschwindigkeit & Zeit (gleicher Weg)',hint:'v×t=s (konstant) → indirekt'},{type:'input',q:'Zug fährt 200 km in 2h. Wie lange für 500 km? (h)',answer:'5',hint:'100 km/h → 500÷100'}],schwer:[{type:'mc',q:'Prozentualer Anstieg von 80 auf 100?',options:['20%','25%','80%','15%'],answer:'25%',hint:'20/80×100'},{type:'input',q:'Nach 20% Rabatt kostet etwas 64 €. Originalpreis? (€)',answer:'80',hint:'64=80% → 64÷0,8'},{type:'mc',q:'1000 € wachsen 10%/Jahr. Nach 2 Jahren?',options:['1200 €','1210 €','1100 €','1020 €'],answer:'1210 €',hint:'1000×1,1×1,1'},{type:'input',q:'3L zu 4€/L und 2L zu 6€/L gemischt. Durchschnittspreis? (€/L)',answer:'5',hint:'(12+12)/5=24/5'},{type:'mc',q:'Verhältnis a:b=3:5. a=12. Was ist b?',options:['15','20','8','18'],answer:'20',hint:'3/5=12/b → b=20'}]}},{id:'geo',label:'Geometrie',icon:'📏',color:'#43e97b',questions:{leicht:[{type:'mc',q:'Umfang eines Quadrats mit a = 5 cm?',options:['10 cm','20 cm','25 cm','15 cm'],answer:'20 cm',hint:'U = 4 × 5'},{type:'input',q:'Rechteck: Länge 8 cm, Breite 5 cm. Fläche? (cm²)',answer:'40',hint:'A = 8 × 5'},{type:'mc',q:'Pythagoras: In einem rechtwinkligen Dreieck gilt:',options:['a+b=c','a²+b²=c²','a×b=c','2a=c'],answer:'a²+b²=c²',hint:'c ist die Hypotenuse'},{type:'input',q:'Hypotenuse: a=3, b=4. c=? (cm)',answer:'5',hint:'c²=9+16=25 → c=5'},{type:'mc',q:'Volumen eines Würfels mit a = 3 cm?',options:['9 cm³','18 cm³','27 cm³','12 cm³'],answer:'27 cm³',hint:'V = 3³ = 27'}],mittel:[{type:'input',q:'Kreis mit r=5 cm. Fläche? (π≈3,14, ganze Zahl)',answer:'79',hint:'A=3,14×25≈78,5≈79'},{type:'mc',q:'Umfang Kreis mit d=10 cm? (π≈3,14)',options:['31,4 cm','62,8 cm','78,5 cm','15,7 cm'],answer:'31,4 cm',hint:'U=π×d=3,14×10'},{type:'input',q:'Kathete a=?, b=12, c=13 (cm)',answer:'5',hint:'a²=169-144=25 → a=5'},{type:'mc',q:'Dreieck: Grundlinie 8cm, Höhe 6cm. Fläche?',options:['48 cm²','24 cm²','14 cm²','12 cm²'],answer:'24 cm²',hint:'A=(8×6)÷2'},{type:'input',q:'Quader: l=6, b=4, h=3. Volumen? (cm³)',answer:'72',hint:'V=6×4×3'}],schwer:[{type:'mc',q:'Oberfläche Würfel mit a=4 cm?',options:['64 cm²','96 cm²','24 cm²','48 cm²'],answer:'96 cm²',hint:'6×a²=6×16'},{type:'input',q:'Zylinder: r=3, h=10. Volumen? (π≈3,14, ganze Zahl)',answer:'283',hint:'V=3,14×9×10'},{type:'mc',q:'Diagonale Rechteck: a=6, b=8?',options:['10 cm','14 cm','7 cm','12 cm'],answer:'10 cm',hint:'d²=36+64=100'},{type:'input',q:'Quader l=5,b=3,h=4. Oberfläche? (cm²)',answer:'94',hint:'2(15+20+12)=2×47'},{type:'mc',q:'Gleichseitiges Dreieck a=4 cm. Fläche? (√3≈1,73)',options:['6,92 cm²','8 cm²','4,5 cm²','5,2 cm²'],answer:'6,92 cm²',hint:'A=(a²×√3)/4=(16×1,73)/4'}]}}];
-var state={level:'leicht',answered:false,correct:0,wrong:0,total:0,topicStats:{terme:{correct:0,total:0},prop:{correct:0,total:0},geo:{correct:0,total:0}},sessionQueue:[],sessionPos:0,elapsedSec:0,timerInterval:null,startTime:null,goalReached:false,consecutiveCorrect:0};
+ 
+// ============================================================
+// THEMEN: Mathematik heute 7 II/III · Realschule Bayern
+// ============================================================
+var topics=[
+  {
+    id:'dreisatz',
+    label:'Proportionalität & Dreisatz',
+    icon:'📊',
+    color:'#6c63ff',
+    questions:{
+      leicht:[
+        {type:'mc',q:'3 Brötchen kosten 1,80 €. Was kosten 5 Brötchen?',options:['3,00 €','2,80 €','3,50 €','2,50 €'],answer:'3,00 €',hint:'1,80 ÷ 3 = 0,60 € pro Stück. Dann: 0,60 × 5'},
+        {type:'mc',q:'Was bedeutet „direkt proportional"?',options:['Wenn x doppelt so groß wird, wird y auch doppelt so groß','Wenn x größer wird, wird y kleiner','x + y bleibt immer gleich','x × y bleibt immer gleich'],answer:'Wenn x doppelt so groß wird, wird y auch doppelt so groß',hint:'y = k · x: verdoppelst du x, verdoppelt sich y'},
+        {type:'input',q:'Ein Auto verbraucht 6 Liter Benzin auf 100 km. Wie viele Liter für 250 km?',answer:'15',hint:'6 ÷ 100 = 0,06 L/km. Dann: 0,06 × 250 = 15'},
+        {type:'mc',q:'Maßstab 1:200000. Eine Strecke auf der Karte ist 3 cm. Wie lang ist sie in km?',options:['6 km','60 km','0,6 km','3 km'],answer:'6 km',hint:'3 × 200000 = 600000 cm = 6000 m = 6 km'},
+        {type:'input',q:'8 Hefte kosten 6,40 €. Was kostet 1 Heft? (€)',answer:'0.8',hint:'6,40 ÷ 8 = 0,80 €'}
+      ],
+      mittel:[
+        {type:'input',q:'5 Näherinnen nähen in 4 Tagen 200 Hemden. Wie lange brauchen 4 Näherinnen für dieselbe Menge? (Tage)',answer:'5',hint:'5 × 4 = 20 Arbeitstage gesamt. 20 ÷ 4 = 5'},
+        {type:'mc',q:'Bei indirekter Proportionalität gilt:',options:['x · y = konstant','x / y = konstant','x + y = konstant','x - y = konstant'],answer:'x · y = konstant',hint:'Mehr Arbeiter = weniger Tage. Das Produkt bleibt gleich.'},
+        {type:'input',q:'y ist direkt proportional zu x. Bei x = 5 ist y = 35. Was ist der Proportionalitätsfaktor k?',answer:'7',hint:'k = y ÷ x = 35 ÷ 5 = 7'},
+        {type:'mc',q:'Maßstab 1:25000 bedeutet:',options:['1 cm auf der Karte = 250 m in Wirklichkeit','1 cm auf der Karte = 25 m in Wirklichkeit','1 cm auf der Karte = 2,5 km in Wirklichkeit','1 cm auf der Karte = 25 km in Wirklichkeit'],answer:'1 cm auf der Karte = 250 m in Wirklichkeit',hint:'1 cm × 25000 = 25000 cm = 250 m'},
+        {type:'mc',q:'12 Maschinen füllen 600 Flaschen in 5 Min. Wie viele Flaschen füllen 4 Maschinen?',options:['200','150','300','400'],answer:'200',hint:'Direkte Proportionalität. 600 ÷ 12 × 4 = 200'}
+      ],
+      schwer:[
+        {type:'mc',q:'Eine Reise dauert mit 80 km/h genau 3 Stunden. Wie lange dauert sie mit 120 km/h?',options:['2 h','1,5 h','4 h','2,5 h'],answer:'2 h',hint:'80 × 3 = 240 km. 240 ÷ 120 = 2'},
+        {type:'mc',q:'Ein Rezept für 4 Personen braucht 300 g Mehl. Für 7 Personen?',options:['525 g','450 g','500 g','600 g'],answer:'525 g',hint:'300 ÷ 4 × 7 = 75 × 7 = 525'},
+        {type:'input',q:'3 Pumpen füllen einen Tank in 8 Stunden. Wie lange braucht nur 1 Pumpe allein? (h)',answer:'24',hint:'3 × 8 = 24 Pumpenstunden. 1 Pumpe: 24 ÷ 1 = 24'},
+        {type:'mc',q:'Verhältnis Breite:Länge eines Rechtecks = 3:5. Umfang = 80 cm. Wie breit ist es?',options:['15 cm','20 cm','25 cm','30 cm'],answer:'15 cm',hint:'2(3x + 5x) = 80 → 16x = 80 → x = 5 → Breite = 3 × 5 = 15'},
+        {type:'mc',q:'Verhältnis a:b = 2:5. Wenn a = 16, was ist b?',options:['40','20','8','10'],answer:'40',hint:'2/5 = 16/b → b = 16 × 5 ÷ 2 = 40'}
+      ]
+    }
+  },
+  {
+    id:'prozent',
+    label:'Prozentrechnung',
+    icon:'💰',
+    color:'#f7971e',
+    questions:{
+      leicht:[
+        {type:'mc',q:'Was sind 10% von 80 €?',options:['8 €','16 €','18 €','40 €'],answer:'8 €',hint:'10 % = 1/10. Dann: 80 ÷ 10 = 8'},
+        {type:'input',q:'Ein Fahrrad kostet 240 €. Es gibt 25% Rabatt. Was kostet es jetzt? (€)',answer:'180',hint:'25% von 240 = 60. Dann: 240 − 60 = 180'},
+        {type:'mc',q:'Wie viel Prozent ist 15 von 60?',options:['25%','20%','15%','30%'],answer:'25%',hint:'15 ÷ 60 × 100 = 25'},
+        {type:'input',q:'Grundwert G = 200, Prozentsatz p = 30%. Prozentwert W = ?',answer:'60',hint:'W = G × p ÷ 100 = 200 × 0,3 = 60'},
+        {type:'mc',q:'Eine Jacke kostet 120 €, reduziert um 15%. Neuer Preis?',options:['102 €','105 €','108 €','100 €'],answer:'102 €',hint:'15% von 120 = 18. Dann: 120 − 18 = 102'}
+      ],
+      mittel:[
+        {type:'input',q:'Nach 20% Preissenkung kostet ein Laptop 640 €. Ursprünglicher Preis? (€)',answer:'800',hint:'640 = 80% von G. G = 640 ÷ 0,8 = 800'},
+        {type:'mc',q:'Eine Stadt hat 50.000 Einwohner. Die Zahl steigt um 4%. Wie viele Einwohner danach?',options:['52.000','54.000','51.000','52.500'],answer:'52.000',hint:'4% von 50000 = 2000. Dann: 50000 + 2000'},
+        {type:'mc',q:'Der Prozentsatz p berechnet sich aus:',options:['p = W / G × 100','p = G / W × 100','p = W × G','p = G − W'],answer:'p = W / G × 100',hint:'p% = (Prozentwert ÷ Grundwert) × 100'},
+        {type:'input',q:'Prozentsatz p = 8%, Grundwert G = 350 €. Prozentwert W = ? (€)',answer:'28',hint:'W = 350 × 8 ÷ 100 = 350 × 0,08 = 28'},
+        {type:'mc',q:'Eine Aktie steigt von 50 € auf 65 €. Wie viel % Steigerung?',options:['30%','25%','15%','20%'],answer:'30%',hint:'(65 − 50) ÷ 50 × 100 = 15 ÷ 50 × 100 = 30'}
+      ],
+      schwer:[
+        {type:'input',q:'Kapital K = 2000 €, Zinssatz p = 3% pro Jahr. Zinsen nach 1 Jahr? (€)',answer:'60',hint:'Z = K × p ÷ 100 = 2000 × 3 ÷ 100 = 60'},
+        {type:'mc',q:'Zinsen Z = 75 €, Kapital K = 1500 €, Laufzeit 1 Jahr. Zinssatz p = ?',options:['5%','4%','6%','3%'],answer:'5%',hint:'p = Z ÷ K × 100 = 75 ÷ 1500 × 100 = 5'},
+        {type:'input',q:'Kapital 5000 €, Zinssatz 2% pro Jahr, Laufzeit 3 Jahre. Gesamtzinsen? (€)',answer:'300',hint:'Z = 5000 × 0,02 × 3 = 300'},
+        {type:'mc',q:'Ein Preis wurde zweimal um 20% reduziert. Wie viel % des Originalpreises bleibt?',options:['64%','60%','40%','80%'],answer:'64%',hint:'0,8 × 0,8 = 0,64 = 64%'},
+        {type:'input',q:'Laufzeit 2 Jahre, Zinssatz 4%, Zinsen Z = 240 €. Kapital K = ? (€)',answer:'3000',hint:'Z = K × p/100 × t → 240 = K × 0,04 × 2 → K = 240 ÷ 0,08 = 3000'}
+      ]
+    }
+  },
+  {
+    id:'thales',
+    label:'Geometrie & Satz des Thales',
+    icon:'📐',
+    color:'#43e97b',
+    questions:{
+      leicht:[
+        {type:'mc',q:'Was sagt der Satz des Thales?',options:['Jeder Winkel im Halbkreis über dem Durchmesser ist 90°','Ein Dreieck hat immer eine Winkelsumme von 180°','Die Hypotenuse ist die längste Seite','Zwei Geraden schneiden sich in einem Punkt'],answer:'Jeder Winkel im Halbkreis über dem Durchmesser ist 90°',hint:'Liegt Punkt P auf dem Halbkreis über AB, gilt immer: Winkel APB = 90°'},
+        {type:'mc',q:'Eine Tangente an einen Kreis...',options:['berührt den Kreis in genau einem Punkt','schneidet den Kreis in zwei Punkten','geht durch den Mittelpunkt','ist parallel zum Radius'],answer:'berührt den Kreis in genau einem Punkt',hint:'Tangente kommt von „tangere" = berühren'},
+        {type:'mc',q:'Die Mittelsenkrechte einer Strecke AB...',options:['steht senkrecht auf AB und geht durch die Mitte','ist parallel zu AB','verbindet A und B','geht nur durch A'],answer:'steht senkrecht auf AB und geht durch die Mitte',hint:'Mittel = Mitte der Strecke; Senkrechte = 90°'},
+        {type:'mc',q:'Alle Punkte der Mittelsenkrechten von AB sind...',options:['gleich weit von A und B entfernt','näher an Punkt A','näher an Punkt B','auf der Strecke AB'],answer:'gleich weit von A und B entfernt',hint:'Das ist die Ortslinieneigenschaft der Mittelsenkrechte'},
+        {type:'mc',q:'Die Winkelhalbierende...',options:['teilt einen Winkel in zwei gleich große Teile','halbiert eine Strecke','steht senkrecht auf einer Seite','verbindet Ecke mit gegenüberliegender Seite'],answer:'teilt einen Winkel in zwei gleich große Teile',hint:'Halbierende = in zwei gleiche Hälften teilen'}
+      ],
+      mittel:[
+        {type:'mc',q:'P liegt auf dem Thales-Kreis über Durchmesser AB. Was gilt für Winkel APB?',options:['Er ist 90°','Er ist 45°','Er ist 60°','Er ist 180°'],answer:'Er ist 90°',hint:'Satz des Thales: Winkel am Kreisbogen über dem Durchmesser = 90°'},
+        {type:'input',q:'AB ist Durchmesser = 10 cm. Punkt P liegt auf dem Kreis. PA = 6 cm. PB = ? (cm)',answer:'8',hint:'Winkel P = 90° → Pythagoras: 6² + PB² = 10². PB² = 64. PB = 8'},
+        {type:'mc',q:'Wo liegt der Umkreismittelpunkt eines rechtwinkligen Dreiecks?',options:['In der Mitte der Hypotenuse','Im Schwerpunkt','In der Mitte der längsten Kathete','Im Höhenschnittpunkt'],answer:'In der Mitte der Hypotenuse',hint:'Umkehrung des Satzes des Thales'},
+        {type:'mc',q:'Eine Tangente steht auf dem Radius im Berührungspunkt...',options:['senkrecht (90°)','parallel (0°)','in 45°','in 60°'],answer:'senkrecht (90°)',hint:'Radius ⊥ Tangente ist ein Grundgesetz der Kreisgeometrie'},
+        {type:'mc',q:'Der Umkreismittelpunkt eines Dreiecks liegt im Schnittpunkt der...',options:['drei Mittelsenkrechten','drei Winkelhalbierenden','drei Höhen','drei Seitenhalbierenden'],answer:'drei Mittelsenkrechten',hint:'Umkreismittelpunkt = gleicher Abstand zu allen 3 Ecken'}
+      ],
+      schwer:[
+        {type:'input',q:'Rechtwinkliges Dreieck: Winkel C = 90°, CA = 8 cm, CB = 15 cm. AB = ? (cm)',answer:'17',hint:'AB² = 8² + 15² = 64 + 225 = 289. √289 = 17'},
+        {type:'mc',q:'Die Mittelparallele (Mittellinie) eines Dreiecks...',options:['verbindet die Mitten zweier Seiten und ist halb so lang wie die dritte Seite','halbiert alle drei Seiten','geht durch alle Eckpunkte','ist die längste Linie'],answer:'verbindet die Mitten zweier Seiten und ist halb so lang wie die dritte Seite',hint:'Mittelparallele ist parallel zur Grundlinie und halb so lang'},
+        {type:'mc',q:'Eine Seitenhalbierende (Median) eines Dreiecks...',options:['verbindet einen Eckpunkt mit der Mitte der gegenüberliegenden Seite','steht senkrecht auf der Seite','halbiert den Winkel','ist der Umkreisradius'],answer:'verbindet einen Eckpunkt mit der Mitte der gegenüberliegenden Seite',hint:'Die drei Seitenhalbierenden treffen sich im Schwerpunkt'},
+        {type:'mc',q:'Auf der Ortslinie „Mittelsenkrechte von AB" liegen alle Punkte P, für die gilt:',options:['PA = PB','PA > PB','PA < PB','P liegt auf AB'],answer:'PA = PB',hint:'Mittelsenkrechte = Ortslinie mit gleichem Abstand zu A und B'},
+        {type:'input',q:'Mittelpunkt M(3|2), Punkt P(7|2) liegt auf dem Kreis. Radius r = ? (cm)',answer:'4',hint:'r = Abstand von M zu P = |7 − 3| = 4'}
+      ]
+    }
+  }
+];
+ 
+// ============================================================
+// STATE
+// ============================================================
+var state={
+  level:'leicht',answered:false,correct:0,wrong:0,total:0,
+  topicStats:{
+    dreisatz:{correct:0,total:0},
+    prozent:{correct:0,total:0},
+    thales:{correct:0,total:0}
+  },
+  sessionQueue:[],sessionPos:0,elapsedSec:0,timerInterval:null,
+  startTime:null,goalReached:false,consecutiveCorrect:0
+};
 var ADAPTIVE_THRESHOLD=3;
-function getQueueKey(t,l){return t+'_'+l;}
+ 
 function buildSession(){
   state.sessionQueue=[];state.sessionPos=0;state.correct=0;state.wrong=0;state.total=0;
-  state.topicStats={terme:{correct:0,total:0},prop:{correct:0,total:0},geo:{correct:0,total:0}};
+  state.topicStats={dreisatz:{correct:0,total:0},prozent:{correct:0,total:0},thales:{correct:0,total:0}};
   state.startTime=new Date();state.consecutiveCorrect=0;
   var lq={};
   topics.forEach(function(t){
@@ -153,7 +260,7 @@ function buildSession(){
   });
   function getFrom(tid){
     if(!lq[tid]||!lq[tid].length){
-      var t=topics.find(function(t){return t.id===tid;});
+      var t=topics.find(function(x){return x.id===tid;});
       var arr=[];for(var i=0;i<t.questions[state.level].length;i++)arr.push(i);
       arr.sort(function(){return Math.random()-0.5;});lq[tid]=arr;
     }
@@ -165,6 +272,7 @@ function buildSession(){
     state.sessionQueue.push(q);
   }
 }
+ 
 function rebuildQueueForLevel(newLevel){
   state.sessionQueue=state.sessionQueue.slice(0,state.sessionPos+1);
   var lq={};
@@ -174,7 +282,7 @@ function rebuildQueueForLevel(newLevel){
   });
   function getFrom(tid){
     if(!lq[tid]||!lq[tid].length){
-      var t=topics.find(function(t){return t.id===tid;});
+      var t=topics.find(function(x){return x.id===tid;});
       var arr=[];for(var i=0;i<t.questions[newLevel].length;i++)arr.push(i);
       arr.sort(function(){return Math.random()-0.5;});lq[tid]=arr;
     }
@@ -186,6 +294,7 @@ function rebuildQueueForLevel(newLevel){
     state.sessionQueue.push(q);
   }
 }
+ 
 function checkAdaptiveLevel(ok){
   if(ok){state.consecutiveCorrect++;
     if(state.consecutiveCorrect>=ADAPTIVE_THRESHOLD){
@@ -195,31 +304,250 @@ function checkAdaptiveLevel(ok){
     }
   }else{state.consecutiveCorrect=0;}
 }
+ 
 function showLevelUpToast(level){
   var labels={mittel:'🟡 Level Up! Jetzt: Mittel',schwer:'🔴 Level Up! Jetzt: Schwer'};
   var toast=document.getElementById('level-up-toast');toast.textContent=labels[level]||'⬆️ Level Up!';
   toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},2500);
 }
+ 
 function getCurrent(){return state.sessionQueue[state.sessionPos];}
-function renderTabs(){var c=document.getElementById('tabs');c.innerHTML='';var cur=getCurrent()?getCurrent().topicId:null;topics.forEach(function(t){var s=state.topicStats[t.id];var pct=s.total>0?Math.round(s.correct/s.total*100):null;var btn=document.createElement('button');btn.className='tab'+(t.id===cur?' active':'');btn.innerHTML=t.icon+' '+t.label+(pct!==null?'<span class="badge">'+pct+'%</span>':'');c.appendChild(btn);});}
-function renderLevels(){var row=document.getElementById('level-row');row.innerHTML='';var labels={leicht:'🟢 Leicht',mittel:'🟡 Mittel',schwer:'🔴 Schwer'};LEVELS.forEach(function(l){var btn=document.createElement('button');btn.className='level-btn'+(state.level===l?' active':'');btn.textContent=labels[l];btn.onclick=function(){state.level=l;state.consecutiveCorrect=0;rebuildQueueForLevel(l);renderAll();};row.appendChild(btn);});}
-function renderQuestion(){var q=getCurrent();if(!q)return;document.getElementById('topic-icon').textContent=q.topicIcon;document.getElementById('topic-label').textContent=q.topicLabel;document.getElementById('question-text').innerHTML=q.q;document.getElementById('hint-box').style.display='none';document.getElementById('hint-btn').style.display='inline-block';document.getElementById('hint-box').textContent=q.hint;document.getElementById('feedback').className='feedback';document.getElementById('next-btn').className='next-btn';state.answered=false;var oc=document.getElementById('options-container');var ic=document.getElementById('input-container');var inp=document.getElementById('answer-input');if(q.type==='mc'){oc.style.display='grid';ic.style.display='none';oc.innerHTML='';q.options.slice().sort(function(){return Math.random()-0.5;}).forEach(function(opt){var btn=document.createElement('button');btn.className='option-btn';btn.textContent=opt;btn.onclick=function(){checkMC(opt,btn);};oc.appendChild(btn);});}else{oc.style.display='none';ic.style.display='flex';inp.value='';inp.className='answer-input';inp.disabled=false;inp.onkeydown=function(e){if(e.key==='Enter')checkInput();};setTimeout(function(){inp.focus();},100);}renderTabs();}
-function checkMC(selected,btn){if(state.answered)return;state.answered=true;var q=getCurrent();var ok=selected===q.answer;record(ok,q.topicId);document.querySelectorAll('.option-btn').forEach(function(b){b.disabled=true;if(b.textContent===q.answer)b.classList.add('correct');});if(!ok)btn.classList.add('wrong');showFeedback(ok,q.answer);checkAdaptiveLevel(ok);}
-function checkInput(){if(state.answered)return;var inp=document.getElementById('answer-input');var val=inp.value.trim().replace(',','.');var q=getCurrent();var ok=val===String(q.answer).replace(',','.');state.answered=true;inp.disabled=true;inp.className='answer-input '+(ok?'correct':'wrong');record(ok,q.topicId);showFeedback(ok,q.answer);checkAdaptiveLevel(ok);}
-function record(ok,topicId){state.total++;if(ok){state.correct++;state.topicStats[topicId].correct++;}else state.wrong++;state.topicStats[topicId].total++;updateStats();renderWeekly();renderTabs();}
-function showFeedback(ok,answer){var fb=document.getElementById('feedback');var hb=document.getElementById('hint-btn');var hbox=document.getElementById('hint-box');if(ok){var msgs=['Super! Richtig! 🎉','Perfekt! 🌟','Ja, genau! ✅','Klasse! 🚀','Sehr gut! ⭐'];fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];fb.className='feedback correct';hb.style.display='none';hbox.style.display='none';}else{fb.textContent='❌ Leider falsch. Richtige Antwort: '+answer;fb.className='feedback wrong';}document.getElementById('next-btn').className='next-btn visible';}
-function showHint(){document.getElementById('hint-box').style.display='block';document.getElementById('hint-btn').style.display='none';}
-function nextQuestion(){state.sessionPos++;if(state.sessionPos>=state.sessionQueue.length)rebuildQueueForLevel(state.level);renderQuestion();}
-function updateStats(){document.getElementById('stat-correct').textContent=state.correct;document.getElementById('stat-wrong').textContent=state.wrong;document.getElementById('stat-pct').textContent=state.total>0?Math.round(state.correct/state.total*100)+'%':'—';}
-function updateDailyBar(){var pct=Math.min(state.elapsedSec/GOAL_SEC*100,100);var fill=document.getElementById('daily-bar-fill');var mins=Math.floor(state.elapsedSec/60);document.getElementById('daily-label').textContent=mins+' / 20 Min';document.getElementById('daily-pct').textContent=Math.round(pct)+'%';fill.style.width=pct+'%';var r,g,b=0;if(pct<=50){var t=pct/50;r=255;g=Math.round(60+t*(165-60));}else{var t=(pct-50)/50;r=Math.round(255+t*(67-255));g=Math.round(165+t*(233-165));b=Math.round(t*123);}fill.style.background='rgb('+r+','+g+','+b+')';}
-function renderWeekly(){var c=document.getElementById('weekly-report');c.innerHTML='';var any=false;topics.forEach(function(t){var s=state.topicStats[t.id];if(s.total===0)return;any=true;var pct=Math.round(s.correct/s.total*100);var color=pct>=70?'#43e97b':pct>=40?'#f7971e':'#ff6584';c.innerHTML+='<div class="report-row"><div class="report-topic">'+t.icon+' '+t.label+'</div><div class="report-bar-track"><div class="report-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div class="report-pct" style="color:'+color+'">'+pct+'%</div></div>';});if(!any)c.innerHTML='<div style="color:var(--text-muted);font-size:0.85rem">Noch keine Aufgaben gelöst.</div>';}
-function showGoalOverlay(){if(document.getElementById('goal-overlay'))return;var overlay=document.createElement('div');overlay.className='goal-overlay';overlay.id='goal-overlay';overlay.innerHTML='<div class="goal-box"><div class="goal-emoji">🎉</div><div class="goal-title">Super, Bruno!</div><div class="goal-sub">20 Minuten geschafft!</div><button class="goal-continue-btn" onclick="closeGoalOverlay()">💪 Weiter üben</button><button class="goal-save-btn" onclick="closeGoalAndFinish()">💾 Ergebnisse speichern</button></div>';document.body.appendChild(overlay);}
+ 
+function renderTabs(){
+  var c=document.getElementById('tabs');c.innerHTML='';
+  var cur=getCurrent()?getCurrent().topicId:null;
+  topics.forEach(function(t){
+    var s=state.topicStats[t.id];
+    var pct=s.total>0?Math.round(s.correct/s.total*100):null;
+    var btn=document.createElement('button');
+    btn.className='tab'+(t.id===cur?' active':'');
+    btn.innerHTML=t.icon+' '+t.label+(pct!==null?'<span class="badge">'+pct+'%</span>':'');
+    c.appendChild(btn);
+  });
+}
+ 
+function renderLevels(){
+  var row=document.getElementById('level-row');row.innerHTML='';
+  var labels={leicht:'🟢 Leicht',mittel:'🟡 Mittel',schwer:'🔴 Schwer'};
+  LEVELS.forEach(function(l){
+    var btn=document.createElement('button');
+    btn.className='level-btn'+(state.level===l?' active':'');
+    btn.textContent=labels[l];
+    btn.onclick=function(){state.level=l;state.consecutiveCorrect=0;rebuildQueueForLevel(l);renderAll();};
+    row.appendChild(btn);
+  });
+}
+ 
+function renderQuestion(){
+  var q=getCurrent();if(!q)return;
+  document.getElementById('topic-icon').textContent=q.topicIcon;
+  document.getElementById('topic-label').textContent=q.topicLabel;
+  document.getElementById('question-text').innerHTML=q.q;
+  // FIX: Tipp erst nach falscher Antwort anzeigen
+  document.getElementById('hint-btn').style.display='none';
+  document.getElementById('hint-box').style.display='none';
+  document.getElementById('hint-box').textContent=q.hint;
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('next-btn').className='next-btn';
+  state.answered=false;
+  var oc=document.getElementById('options-container');
+  var ic=document.getElementById('input-container');
+  var inp=document.getElementById('answer-input');
+  if(q.type==='mc'){
+    oc.style.display='grid';ic.style.display='none';oc.innerHTML='';
+    q.options.slice().sort(function(){return Math.random()-0.5;}).forEach(function(opt){
+      var btn=document.createElement('button');
+      btn.className='option-btn';btn.textContent=opt;
+      btn.onclick=function(){checkMC(opt,btn);};
+      oc.appendChild(btn);
+    });
+  }else{
+    oc.style.display='none';ic.style.display='flex';
+    inp.value='';inp.className='answer-input';inp.disabled=false;
+    inp.onkeydown=function(e){if(e.key==='Enter')checkInput();};
+    setTimeout(function(){inp.focus();},100);
+  }
+  renderTabs();
+}
+ 
+function checkMC(selected,btn){
+  if(state.answered)return;
+  state.answered=true;
+  var q=getCurrent();
+  var ok=selected===q.answer;
+  record(ok,q.topicId);
+  document.querySelectorAll('.option-btn').forEach(function(b){
+    b.disabled=true;
+    if(b.textContent===q.answer)b.classList.add('correct');
+  });
+  if(!ok)btn.classList.add('wrong');
+  showFeedback(ok,q.answer);
+  checkAdaptiveLevel(ok);
+}
+ 
+function checkInput(){
+  if(state.answered)return;
+  var inp=document.getElementById('answer-input');
+  var val=inp.value.trim().replace(',','.');
+  var q=getCurrent();
+  var ok=val===String(q.answer).replace(',','.');
+  state.answered=true;
+  inp.disabled=true;
+  inp.className='answer-input '+(ok?'correct':'wrong');
+  record(ok,q.topicId);
+  showFeedback(ok,q.answer);
+  checkAdaptiveLevel(ok);
+}
+ 
+function record(ok,topicId){
+  state.total++;
+  if(ok){state.correct++;state.topicStats[topicId].correct++;}
+  else state.wrong++;
+  state.topicStats[topicId].total++;
+  updateStats();renderWeekly();renderTabs();
+}
+ 
+function showFeedback(ok,answer){
+  var fb=document.getElementById('feedback');
+  var hb=document.getElementById('hint-btn');
+  var hbox=document.getElementById('hint-box');
+  if(ok){
+    var msgs=['Super! Richtig! 🎉','Perfekt! 🌟','Ja, genau! ✅','Klasse! 🚀','Sehr gut! ⭐'];
+    fb.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    fb.className='feedback correct';
+    hb.style.display='none';
+    hbox.style.display='none';
+  }else{
+    fb.textContent='❌ Leider falsch. Richtige Antwort: '+answer;
+    fb.className='feedback wrong';
+    // FIX: Tipp erst NACH falscher Antwort sichtbar machen
+    hb.style.display='inline-block';
+  }
+  document.getElementById('next-btn').className='next-btn visible';
+}
+ 
+function showHint(){
+  document.getElementById('hint-box').style.display='block';
+  document.getElementById('hint-btn').style.display='none';
+}
+ 
+function nextQuestion(){
+  state.sessionPos++;
+  if(state.sessionPos>=state.sessionQueue.length)rebuildQueueForLevel(state.level);
+  renderQuestion();
+}
+ 
+function updateStats(){
+  document.getElementById('stat-correct').textContent=state.correct;
+  document.getElementById('stat-wrong').textContent=state.wrong;
+  document.getElementById('stat-pct').textContent=state.total>0?Math.round(state.correct/state.total*100)+'%':'—';
+}
+ 
+function updateDailyBar(){
+  var pct=Math.min(state.elapsedSec/GOAL_SEC*100,100);
+  var fill=document.getElementById('daily-bar-fill');
+  var mins=Math.floor(state.elapsedSec/60);
+  document.getElementById('daily-label').textContent=mins+' / 20 Min';
+  document.getElementById('daily-pct').textContent=Math.round(pct)+'%';
+  fill.style.width=pct+'%';
+  var r,g,b=0;
+  if(pct<=50){var t=pct/50;r=255;g=Math.round(60+t*(165-60));}
+  else{var t=(pct-50)/50;r=Math.round(255+t*(67-255));g=Math.round(165+t*(233-165));b=Math.round(t*123);}
+  fill.style.background='rgb('+r+','+g+','+b+')';
+}
+ 
+function renderWeekly(){
+  var c=document.getElementById('weekly-report');c.innerHTML='';
+  var any=false;
+  topics.forEach(function(t){
+    var s=state.topicStats[t.id];
+    if(s.total===0)return;
+    any=true;
+    var pct=Math.round(s.correct/s.total*100);
+    var color=pct>=70?'#43e97b':pct>=40?'#f7971e':'#ff6584';
+    c.innerHTML+='<div class="report-row"><div class="report-topic">'+t.icon+' '+t.label+'</div><div class="report-bar-track"><div class="report-bar-fill" style="width:'+pct+'%;background:'+color+'"></div></div><div class="report-pct" style="color:'+color+'">'+pct+'%</div></div>';
+  });
+  if(!any)c.innerHTML='<div style="color:var(--text-muted);font-size:0.85rem">Noch keine Aufgaben gelöst.</div>';
+}
+ 
+function showGoalOverlay(){
+  if(document.getElementById('goal-overlay'))return;
+  var overlay=document.createElement('div');
+  overlay.className='goal-overlay';overlay.id='goal-overlay';
+  overlay.innerHTML='<div class="goal-box"><div class="goal-emoji">🎉</div><div class="goal-title">Super, Bruno!</div><div class="goal-sub">20 Minuten geschafft!</div><button class="goal-continue-btn" onclick="closeGoalOverlay()">💪 Weiter üben</button><button class="goal-save-btn" onclick="closeGoalAndFinish()">💾 Ergebnisse speichern</button></div>';
+  document.body.appendChild(overlay);
+}
+ 
 function closeGoalOverlay(){var el=document.getElementById('goal-overlay');if(el)el.remove();}
 function closeGoalAndFinish(){closeGoalOverlay();showFinish();}
-function showFinish(){clearInterval(state.timerInterval);var pct=state.total>0?Math.round(state.correct/state.total*100):0;var emoji=pct>=80?'🏆':pct>=60?'💪':'📚';var msg=pct>=80?'Ausgezeichnet! Weiter so!':pct>=60?'Gut gemacht! Weiter üben!':'Nicht aufgeben — jeden Tag besser!';var ts=state.topicStats;var dauer=Math.round(state.elapsedSec/60);document.getElementById('question-card').innerHTML='<div class="finish-card"><div class="finish-emoji">'+emoji+'</div><div class="finish-title">Geschafft!</div><div class="finish-sub">'+state.correct+' von '+state.total+' richtig — '+pct+'%</div><div class="finish-sub" style="margin-bottom:0">'+msg+'</div><div class="finish-scores"><div class="finish-score-item"><div class="finish-score-val" style="color:#6c63ff">'+(ts.terme.total>0?Math.round(ts.terme.correct/ts.terme.total*100)+'%':'—')+'</div><div class="finish-score-label">🔢 Terme</div></div><div class="finish-score-item"><div class="finish-score-val" style="color:#ff6584">'+(ts.prop.total>0?Math.round(ts.prop.correct/ts.prop.total*100)+'%':'—')+'</div><div class="finish-score-label">📐 Prop.</div></div><div class="finish-score-item"><div class="finish-score-val" style="color:#43e97b">'+(ts.geo.total>0?Math.round(ts.geo.correct/ts.geo.total*100)+'%':'—')+'</div><div class="finish-score-label">📏 Geo.</div></div></div><div class="save-status" id="save-status"></div><button class="save-btn" id="save-btn" onclick="saveResults('+pct+','+dauer+')">💾 Ergebnisse speichern</button><button class="restart-btn" onclick="restartSession()">🔁 Nochmal üben</button></div>';}
-function saveResults(pct,dauer){var btn=document.getElementById('save-btn');var status=document.getElementById('save-status');btn.disabled=true;btn.textContent='Wird gespeichert...';var ts=state.topicStats;var payload={level:state.level,terme:{pct:ts.terme.total>0?Math.round(ts.terme.correct/ts.terme.total*100):0,correct:ts.terme.correct,total:ts.terme.total},prop:{pct:ts.prop.total>0?Math.round(ts.prop.correct/ts.prop.total*100):0,correct:ts.prop.correct,total:ts.prop.total},geo:{pct:ts.geo.total>0?Math.round(ts.geo.correct/ts.geo.total*100):0,correct:ts.geo.correct,total:ts.geo.total},gesamt:{pct:pct,correct:state.correct,total:state.total},dauer:dauer};fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)}).then(function(r){return r.json();}).then(function(d){if(d.status==='ok'){status.textContent='✅ Ergebnisse gespeichert! Papa kann deinen Fortschritt sehen.';status.className='save-status ok';btn.textContent='✅ Gespeichert';}else{throw new Error(d.message);}}).catch(function(){status.textContent='⚠️ Speichern fehlgeschlagen. Bitte Papa zeigen.';status.className='save-status err';btn.disabled=false;btn.textContent='💾 Nochmal versuchen';});}
-function restartSession(){state.elapsedSec=0;state.goalReached=false;state.consecutiveCorrect=0;buildSession();renderAll();startTimer();}
-function startTimer(){clearInterval(state.timerInterval);state.timerInterval=setInterval(function(){state.elapsedSec++;var m=String(Math.floor(state.elapsedSec/60)).padStart(2,'0');var s=String(state.elapsedSec%60).padStart(2,'0');document.getElementById('timer').textContent=m+':'+s;updateDailyBar();if(state.elapsedSec>=GOAL_SEC&&!state.goalReached){state.goalReached=true;showGoalOverlay();}},1000);}
+ 
+function showFinish(){
+  clearInterval(state.timerInterval);
+  var pct=state.total>0?Math.round(state.correct/state.total*100):0;
+  var emoji=pct>=80?'🏆':pct>=60?'💪':'📚';
+  var msg=pct>=80?'Ausgezeichnet! Weiter so!':pct>=60?'Gut gemacht! Weiter üben!':'Nicht aufgeben — jeden Tag besser!';
+  var ts=state.topicStats;
+  var dauer=Math.round(state.elapsedSec/60);
+  document.getElementById('question-card').innerHTML='<div class="finish-card">'
+    +'<div class="finish-emoji">'+emoji+'</div>'
+    +'<div class="finish-title">Geschafft!</div>'
+    +'<div class="finish-sub">'+state.correct+' von '+state.total+' richtig — '+pct+'%</div>'
+    +'<div class="finish-sub" style="margin-bottom:0">'+msg+'</div>'
+    +'<div class="finish-scores">'
+    +'<div class="finish-score-item"><div class="finish-score-val" style="color:#6c63ff">'+(ts.dreisatz.total>0?Math.round(ts.dreisatz.correct/ts.dreisatz.total*100)+'%':'—')+'</div><div class="finish-score-label">📊 Dreisatz</div></div>'
+    +'<div class="finish-score-item"><div class="finish-score-val" style="color:#f7971e">'+(ts.prozent.total>0?Math.round(ts.prozent.correct/ts.prozent.total*100)+'%':'—')+'</div><div class="finish-score-label">💰 Prozent</div></div>'
+    +'<div class="finish-score-item"><div class="finish-score-val" style="color:#43e97b">'+(ts.thales.total>0?Math.round(ts.thales.correct/ts.thales.total*100)+'%':'—')+'</div><div class="finish-score-label">📐 Geometrie</div></div>'
+    +'</div>'
+    +'<div class="save-status" id="save-status"></div>'
+    +'<button class="save-btn" id="save-btn" onclick="saveResults('+pct+','+dauer+')">💾 Ergebnisse speichern</button>'
+    +'<button class="restart-btn" onclick="restartSession()">🔁 Nochmal üben</button></div>';
+}
+ 
+function saveResults(pct,dauer){
+  var btn=document.getElementById('save-btn');
+  var status=document.getElementById('save-status');
+  btn.disabled=true;btn.textContent='Wird gespeichert...';
+  var ts=state.topicStats;
+  // Mapping to Sheet columns: terme→dreisatz, prop→prozent, geo→thales
+  var payload={
+    level:state.level,
+    terme:{pct:ts.dreisatz.total>0?Math.round(ts.dreisatz.correct/ts.dreisatz.total*100):0,correct:ts.dreisatz.correct,total:ts.dreisatz.total},
+    prop:{pct:ts.prozent.total>0?Math.round(ts.prozent.correct/ts.prozent.total*100):0,correct:ts.prozent.correct,total:ts.prozent.total},
+    geo:{pct:ts.thales.total>0?Math.round(ts.thales.correct/ts.thales.total*100):0,correct:ts.thales.correct,total:ts.thales.total},
+    gesamt:{pct:pct,correct:state.correct,total:state.total},
+    dauer:dauer
+  };
+  fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload)})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.status==='ok'){
+        status.textContent='✅ Ergebnisse gespeichert! Papa kann deinen Fortschritt sehen.';
+        status.className='save-status ok';btn.textContent='✅ Gespeichert';
+      }else{throw new Error(d.message);}
+    })
+    .catch(function(){
+      status.textContent='⚠️ Speichern fehlgeschlagen. Bitte Papa zeigen.';
+      status.className='save-status err';btn.disabled=false;btn.textContent='💾 Nochmal versuchen';
+    });
+}
+ 
+function restartSession(){
+  state.elapsedSec=0;state.goalReached=false;state.consecutiveCorrect=0;
+  buildSession();renderAll();startTimer();
+}
+ 
+function startTimer(){
+  clearInterval(state.timerInterval);
+  state.timerInterval=setInterval(function(){
+    state.elapsedSec++;
+    var m=String(Math.floor(state.elapsedSec/60)).padStart(2,'0');
+    var s=String(state.elapsedSec%60).padStart(2,'0');
+    document.getElementById('timer').textContent=m+':'+s;
+    updateDailyBar();
+    if(state.elapsedSec>=GOAL_SEC&&!state.goalReached){state.goalReached=true;showGoalOverlay();}
+  },1000);
+}
+ 
 function renderAll(){renderLevels();renderQuestion();updateStats();renderWeekly();updateDailyBar();}
 buildSession();renderAll();startTimer();
 </script>
