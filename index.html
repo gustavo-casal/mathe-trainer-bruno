@@ -214,21 +214,27 @@ var topics=[
         {type:'mc',q:'Eine Tangente an einen Kreis...',options:['berührt den Kreis in genau einem Punkt','schneidet den Kreis in zwei Punkten','geht durch den Mittelpunkt','ist parallel zum Radius'],answer:'berührt den Kreis in genau einem Punkt',hint:'Tangente kommt von „tangere" = berühren'},
         {type:'mc',q:'Die Mittelsenkrechte einer Strecke AB...',options:['steht senkrecht auf AB und geht durch die Mitte','ist parallel zu AB','verbindet A und B','geht nur durch A'],answer:'steht senkrecht auf AB und geht durch die Mitte',hint:'Mittel = Mitte der Strecke; Senkrechte = 90°'},
         {type:'mc',q:'Alle Punkte der Mittelsenkrechten von AB sind...',options:['gleich weit von A und B entfernt','näher an Punkt A','näher an Punkt B','auf der Strecke AB'],answer:'gleich weit von A und B entfernt',hint:'Das ist die Ortslinieneigenschaft der Mittelsenkrechte'},
-        {type:'mc',q:'Die Winkelhalbierende...',options:['teilt einen Winkel in zwei gleich große Teile','halbiert eine Strecke','steht senkrecht auf einer Seite','verbindet Ecke mit gegenüberliegender Seite'],answer:'teilt einen Winkel in zwei gleich große Teile',hint:'Halbierende = in zwei gleiche Hälften teilen'}
+        {type:'mc',q:'Die Winkelhalbierende...',options:['teilt einen Winkel in zwei gleich große Teile','halbiert eine Strecke','steht senkrecht auf einer Seite','verbindet Ecke mit gegenüberliegender Seite'],answer:'teilt einen Winkel in zwei gleich große Teile',hint:'Halbierende = in zwei gleiche Hälften teilen'},
+        {type:'mc',q:'Eine Gerade, die einen Kreis in zwei Punkten schneidet, heißt...',options:['Sekante','Tangente','Passante','Sehne'],answer:'Sekante',hint:'Sekante schneidet den Kreis in 2 Punkten (lat. secare = schneiden)'},
+        {type:'mc',q:'Eine Strecke, die zwei Punkte auf dem Kreis verbindet, heißt...',options:['Sehne','Tangente','Radius','Passante'],answer:'Sehne',hint:'Die längste Sehne eines Kreises ist der Durchmesser'}
       ],
       mittel:[
         {type:'mc',q:'P liegt auf dem Thales-Kreis über Durchmesser AB. Was gilt für Winkel APB?',options:['Er ist 90°','Er ist 45°','Er ist 60°','Er ist 180°'],answer:'Er ist 90°',hint:'Satz des Thales: Winkel am Kreisbogen über dem Durchmesser = 90°'},
         {type:'input',q:'AB ist Durchmesser = 10 cm. Punkt P liegt auf dem Kreis. PA = 6 cm. PB = ? (cm)',answer:'8',hint:'Winkel P = 90° → Pythagoras: 6² + PB² = 10². PB² = 64. PB = 8'},
         {type:'mc',q:'Wo liegt der Umkreismittelpunkt eines rechtwinkligen Dreiecks?',options:['In der Mitte der Hypotenuse','Im Schwerpunkt','In der Mitte der längsten Kathete','Im Höhenschnittpunkt'],answer:'In der Mitte der Hypotenuse',hint:'Umkehrung des Satzes des Thales'},
         {type:'mc',q:'Eine Tangente steht auf dem Radius im Berührungspunkt...',options:['senkrecht (90°)','parallel (0°)','in 45°','in 60°'],answer:'senkrecht (90°)',hint:'Radius ⊥ Tangente ist ein Grundgesetz der Kreisgeometrie'},
-        {type:'mc',q:'Der Umkreismittelpunkt eines Dreiecks liegt im Schnittpunkt der...',options:['drei Mittelsenkrechten','drei Winkelhalbierenden','drei Höhen','drei Seitenhalbierenden'],answer:'drei Mittelsenkrechten',hint:'Umkreismittelpunkt = gleicher Abstand zu allen 3 Ecken'}
+        {type:'mc',q:'Der Umkreismittelpunkt eines Dreiecks liegt im Schnittpunkt der...',options:['drei Mittelsenkrechten','drei Winkelhalbierenden','drei Höhen','drei Seitenhalbierenden'],answer:'drei Mittelsenkrechten',hint:'Umkreismittelpunkt = gleicher Abstand zu allen 3 Ecken'},
+        {type:'mc',q:'Eine Gerade, die den Kreis weder berührt noch schneidet, heißt...',options:['Passante','Sekante','Sehne','Tangente'],answer:'Passante',hint:'Passante geht am Kreis vorbei – kein gemeinsamer Punkt'},
+        {type:'mc',q:'Der Abstand eines Punktes P vom Mittelpunkt M ist kleiner als der Radius. Wo liegt P?',options:['innerhalb des Kreises','auf dem Kreis','außerhalb des Kreises','auf der Tangente'],answer:'innerhalb des Kreises',hint:'Abstand < r → innen; = r → auf dem Kreis; > r → außen'}
       ],
       schwer:[
         {type:'input',q:'Rechtwinkliges Dreieck: Winkel C = 90°, CA = 8 cm, CB = 15 cm. AB = ? (cm)',answer:'17',hint:'AB² = 8² + 15² = 64 + 225 = 289. √289 = 17'},
         {type:'mc',q:'Die Mittelparallele (Mittellinie) eines Dreiecks...',options:['verbindet die Mitten zweier Seiten und ist halb so lang wie die dritte Seite','halbiert alle drei Seiten','geht durch alle Eckpunkte','ist die längste Linie'],answer:'verbindet die Mitten zweier Seiten und ist halb so lang wie die dritte Seite',hint:'Mittelparallele ist parallel zur Grundlinie und halb so lang'},
         {type:'mc',q:'Eine Seitenhalbierende (Median) eines Dreiecks...',options:['verbindet einen Eckpunkt mit der Mitte der gegenüberliegenden Seite','steht senkrecht auf der Seite','halbiert den Winkel','ist der Umkreisradius'],answer:'verbindet einen Eckpunkt mit der Mitte der gegenüberliegenden Seite',hint:'Die drei Seitenhalbierenden treffen sich im Schwerpunkt'},
         {type:'mc',q:'Auf der Ortslinie „Mittelsenkrechte von AB" liegen alle Punkte P, für die gilt:',options:['PA = PB','PA > PB','PA < PB','P liegt auf AB'],answer:'PA = PB',hint:'Mittelsenkrechte = Ortslinie mit gleichem Abstand zu A und B'},
-        {type:'input',q:'Mittelpunkt M(3|2), Punkt P(7|2) liegt auf dem Kreis. Radius r = ? (cm)',answer:'4',hint:'r = Abstand von M zu P = |7 − 3| = 4'}
+        {type:'input',q:'Mittelpunkt M(3|2), Punkt P(7|2) liegt auf dem Kreis. Radius r = ? (cm)',answer:'4',hint:'r = Abstand von M zu P = |7 − 3| = 4'},
+        {type:'mc',q:'Ein Kreis hat Radius r = 5 cm. Punkt P ist 7 cm vom Mittelpunkt entfernt. Wo liegt P?',options:['außerhalb des Kreises','innerhalb des Kreises','auf dem Kreis','im Mittelpunkt'],answer:'außerhalb des Kreises',hint:'Abstand 7 cm > Radius 5 cm → P liegt außerhalb'},
+        {type:'input',q:'Wie lang ist die längste Sehne in einem Kreis mit Radius 6 cm? (cm)',answer:'12',hint:'Die längste Sehne ist der Durchmesser = 2 × r = 2 × 6 = 12'}
       ]
     }
   }
